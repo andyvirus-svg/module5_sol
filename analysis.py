@@ -218,6 +218,7 @@ except ImportError:
     print("Installing kaleido for image export...")
     import subprocess
     subprocess.check_call(['pip', 'install', 'kaleido', '--break-system-packages'])
+    import kaleido
 
 import plotly.graph_objects as go
 
@@ -274,8 +275,8 @@ fig.update_layout(
     height=600
 )
 
-fig.write_image("alluvial_diagram.jpg", width=1200, height=600, scale=2)
-print("✓ Alluvial diagram saved as 'alluvial_diagram.jpg'")
+fig.write_image("alluvial_diagram.png", width=1200, height=600, scale=2)
+print("✓ Alluvial diagram saved as 'alluvial_diagram.png'")
 fig.show()
 
 print("\nVISUALIZATION 2: TERNARY PLOT")
@@ -327,8 +328,8 @@ fig.update_layout(
     height=700, width=900, showlegend=False
 )
 
-fig.write_image("ternary_plot.jpg", width=1200, height=900, scale=2)
-print("✓ Ternary plot saved as 'ternary_plot.jpg'")
+fig.write_image("ternary_plot.png", width=1200, height=900, scale=2)
+print("✓ Ternary plot saved as 'ternary_plot.png'")
 fig.show()
 
 print("\nSTRATEGIC DECISION")
