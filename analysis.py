@@ -202,126 +202,81 @@ print("\nVISUALIZATION 1: ALLUVIAL DIAGRAM")
 top_countries = df_merged.groupby('Country')['Brand'].count().nlargest(5).index.tolist()
 df_alluvial = df_merged[df_merged['Country'].isin(top_countries)].copy()
 
+# Ensure plotly and kaleido are installed
 try:
     import plotly.graph_objects as go
-
-    region_country = df_alluvial.groupby(['Region', 'Country']).size().reset_index(name='count')
-    country_status = df_alluvial.groupby(['Country', 'Status']).size().reset_index(name='count')
-
-    regions = region_country['Region'].unique().tolist()
-    countries = df_alluvial['Country'].unique().tolist()
-    statuses = df_alluvial['Status'].unique().tolist()
-
-    all_nodes = regions + countries + statuses
-    node_dict = {node: i for i, node in enumerate(all_nodes)}
-
-    sources = []
-    targets = []
-    values = []
-
-    for _, row in region_country.iterrows():
-        sources.append(node_dict[row['Region']])
-        targets.append(node_dict[row['Country']])
-        values.append(row['count'])
-
-    for _, row in country_status.iterrows():
-        sources.append(node_dict[row['Country']])
-        targets.append(node_dict[row['Status']])
-        values.append(row['count'])
-
-    status_colors = {'Active': 'green', 'Defunct': 'red', 'Discontinued': 'orange'}
-    node_colors = []
-    for node in all_nodes:
-        if node in statuses:
-            node_colors.append(status_colors[node])
-        else:
-            node_colors.append('lightblue')
-
-    fig = go.Figure(data=[go.Sankey(
-        node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=0.5),
-            label=all_nodes,
-            color=node_colors
-        ),
-        link=dict(
-            source=sources,
-            target=targets,
-            value=values
-        )
-    )])
-
-    fig.update_layout(
-        title_text="Mobile Phone Manufacturer Flow: Region → Country → Status",
-        font_size=12,
-        height=600
-    )
-
-    fig.show()
-    print("✓ Alluvial diagram displayed")
-
 except ImportError:
     print("Installing Plotly...")
     import subprocess
     subprocess.check_call(['pip', 'install', 'plotly', '--break-system-packages'])
     import plotly.graph_objects as go
 
-    region_country = df_alluvial.groupby(['Region', 'Country']).size().reset_index(name='count')
-    country_status = df_alluvial.groupby(['Country', 'Status']).size().reset_index(name='count')
+# Install kaleido for image export
+try:
+    import kaleido
+except ImportError:
+    print("Installing kaleido for image export...")
+    import subprocess
+    subprocess.check_call(['pip', 'install', 'kaleido', '--break-system-packages'])
 
-    regions = region_country['Region'].unique().tolist()
-    countries = df_alluvial['Country'].unique().tolist()
-    statuses = df_alluvial['Status'].unique().tolist()
+import plotly.graph_objects as go
 
-    all_nodes = regions + countries + statuses
-    node_dict = {node: i for i, node in enumerate(all_nodes)}
+region_country = df_alluvial.groupby(['Region', 'Country']).size().reset_index(name='count')
+country_status = df_alluvial.groupby(['Country', 'Status']).size().reset_index(name='count')
 
-    sources = []
-    targets = []
-    values = []
+regions = region_country['Region'].unique().tolist()
+countries = df_alluvial['Country'].unique().tolist()
+statuses = df_alluvial['Status'].unique().tolist()
 
-    for _, row in region_country.iterrows():
-        sources.append(node_dict[row['Region']])
-        targets.append(node_dict[row['Country']])
-        values.append(row['count'])
+all_nodes = regions + countries + statuses
+node_dict = {node: i for i, node in enumerate(all_nodes)}
 
-    for _, row in country_status.iterrows():
-        sources.append(node_dict[row['Country']])
-        targets.append(node_dict[row['Status']])
-        values.append(row['count'])
+sources = []
+targets = []
+values = []
 
-    status_colors = {'Active': 'green', 'Defunct': 'red', 'Discontinued': 'orange'}
-    node_colors = []
-    for node in all_nodes:
-        if node in statuses:
-            node_colors.append(status_colors[node])
-        else:
-            node_colors.append('lightblue')
+for _, row in region_country.iterrows():
+    sources.append(node_dict[row['Region']])
+    targets.append(node_dict[row['Country']])
+    values.append(row['count'])
 
-    fig = go.Figure(data=[go.Sankey(
-        node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color="black", width=0.5),
-            label=all_nodes,
-            color=node_colors
-        ),
-        link=dict(
-            source=sources,
-            target=targets,
-            value=values
-        )
-    )])
+for _, row in country_status.iterrows():
+    sources.append(node_dict[row['Country']])
+    targets.append(node_dict[row['Status']])
+    values.append(row['count'])
 
-    fig.update_layout(
-        title_text="Mobile Phone Manufacturer Flow: Region → Country → Status",
-        font_size=12,
-        height=600
+status_colors = {'Active': 'green', 'Defunct': 'red', 'Discontinued': 'orange'}
+node_colors = []
+for node in all_nodes:
+    if node in statuses:
+        node_colors.append(status_colors[node])
+    else:
+        node_colors.append('lightblue')
+
+fig = go.Figure(data=[go.Sankey(
+    node=dict(
+        pad=15,
+        thickness=20,
+        line=dict(color="black", width=0.5),
+        label=all_nodes,
+        color=node_colors
+    ),
+    link=dict(
+        source=sources,
+        target=targets,
+        value=values
     )
+)])
 
-    fig.show()
-    print("✓ Alluvial diagram displayed")
+fig.update_layout(
+    title_text="Mobile Phone Manufacturer Flow: Region → Country → Status",
+    font_size=12,
+    height=600
+)
+
+fig.write_image("alluvial_diagram.jpg", width=1200, height=600, scale=2)
+print("✓ Alluvial diagram saved as 'alluvial_diagram.jpg'")
+fig.show()
 
 print("\nVISUALIZATION 2: TERNARY PLOT")
 
@@ -344,43 +299,37 @@ for region in df_merged['Region'].unique():
 
 comp_df = pd.DataFrame(region_composition)
 
-try:
-    import plotly.graph_objects as go
+fig = go.Figure(go.Scatterternary(
+    a=comp_df['Active'],
+    b=comp_df['Defunct'],
+    c=comp_df['Discontinued'],
+    text=comp_df['Region'],
+    mode='markers+text',
+    marker=dict(
+        size=10 + comp_df['Total'] / 2,
+        color=list(range(len(comp_df))),
+        colorscale='Viridis',
+        line=dict(width=2, color='black'),
+        showscale=False
+    ),
+    textposition="top center",
+    textfont=dict(size=11, color='black')
+))
 
-    fig = go.Figure(go.Scatterternary(
-        a=comp_df['Active'],
-        b=comp_df['Defunct'],
-        c=comp_df['Discontinued'],
-        text=comp_df['Region'],
-        mode='markers+text',
-        marker=dict(
-            size=10 + comp_df['Total'] / 2,
-            color=list(range(len(comp_df))),
-            colorscale='Viridis',
-            line=dict(width=2, color='black'),
-            showscale=False
-        ),
-        textposition="top center",
-        textfont=dict(size=11, color='black')
-    ))
+fig.update_layout(
+    title='Ternary Plot: Regional Manufacturer Status Composition',
+    ternary=dict(
+        sum=1,
+        aaxis=dict(title='Active (%)', min=0, linewidth=2, ticks='outside'),
+        baxis=dict(title='Defunct (%)', min=0, linewidth=2, ticks='outside'),
+        caxis=dict(title='Discontinued (%)', min=0, linewidth=2, ticks='outside')
+    ),
+    height=700, width=900, showlegend=False
+)
 
-    fig.update_layout(
-        title='Ternary Plot: Regional Manufacturer Status Composition',
-        ternary=dict(
-            sum=1,
-            aaxis=dict(title='Active (%)', min=0, linewidth=2, ticks='outside'),
-            baxis=dict(title='Defunct (%)', min=0, linewidth=2, ticks='outside'),
-            caxis=dict(title='Discontinued (%)', min=0, linewidth=2, ticks='outside')
-        ),
-        height=700, width=900, showlegend=False
-    )
-
-    fig.write_html("ternary_plot.html")
-    fig.show()
-    print("✓ Ternary plot displayed and saved as 'ternary_plot.html'")
-
-except Exception as e:
-    print(f"Could not create ternary plot: {e}")
+fig.write_image("ternary_plot.jpg", width=1200, height=900, scale=2)
+print("✓ Ternary plot saved as 'ternary_plot.jpg'")
+fig.show()
 
 print("\nSTRATEGIC DECISION")
 
