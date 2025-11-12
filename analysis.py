@@ -202,7 +202,7 @@ print("\nVISUALIZATION 1: ALLUVIAL DIAGRAM")
 top_countries = df_merged.groupby('Country')['Brand'].count().nlargest(5).index.tolist()
 df_alluvial = df_merged[df_merged['Country'].isin(top_countries)].copy()
 
-# Ensure plotly and kaleido are installed
+# Ensure plotly is installed
 try:
     import plotly.graph_objects as go
 except ImportError:
@@ -210,17 +210,6 @@ except ImportError:
     import subprocess
     subprocess.check_call(['pip', 'install', 'plotly', '--break-system-packages'])
     import plotly.graph_objects as go
-
-# Install kaleido for image export
-try:
-    import kaleido
-except ImportError:
-    print("Installing kaleido for image export...")
-    import subprocess
-    subprocess.check_call(['pip', 'install', 'kaleido', '--break-system-packages'])
-    import kaleido
-
-import plotly.graph_objects as go
 
 region_country = df_alluvial.groupby(['Region', 'Country']).size().reset_index(name='count')
 country_status = df_alluvial.groupby(['Country', 'Status']).size().reset_index(name='count')
@@ -275,8 +264,16 @@ fig.update_layout(
     height=600
 )
 
-fig.write_image("alluvial_diagram.png", width=1200, height=600, scale=2)
-print("✓ Alluvial diagram saved as 'alluvial_diagram.png'")
+# Save as HTML and try PNG if kaleido is available
+fig.write_html("alluvial_diagram.html")
+print("✓ Alluvial diagram saved as 'alluvial_diagram.html'")
+
+try:
+    fig.write_image("alluvial_diagram.png", width=1200, height=600, scale=2)
+    print("✓ Alluvial diagram also saved as 'alluvial_diagram.png'")
+except Exception as e:
+    print("  (PNG export skipped - kaleido not available)")
+
 fig.show()
 
 print("\nVISUALIZATION 2: TERNARY PLOT")
@@ -328,8 +325,16 @@ fig.update_layout(
     height=700, width=900, showlegend=False
 )
 
-fig.write_image("ternary_plot.png", width=1200, height=900, scale=2)
-print("✓ Ternary plot saved as 'ternary_plot.png'")
+# Save as HTML and try PNG if kaleido is available
+fig.write_html("ternary_plot.html")
+print("✓ Ternary plot saved as 'ternary_plot.html'")
+
+try:
+    fig.write_image("ternary_plot.png", width=1200, height=900, scale=2)
+    print("✓ Ternary plot also saved as 'ternary_plot.png'")
+except Exception as e:
+    print("  (PNG export skipped - kaleido not available)")
+
 fig.show()
 
 print("\nSTRATEGIC DECISION")
